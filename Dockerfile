@@ -1,56 +1,58 @@
-# Multi-stage build for production-ready FastAPI application
-FROM python:3.11-slim as builder
+# =========================
+# Builder stage
+# =========================
+FROM python:3.11-slim AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Instalar dependências de build
 RUN apt-get update && apt-get install -y \
     gcc \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Copiar requirements
 COPY requirements.txt .
 
-# Install Python dependencies
+# Instalar dependências Python no diretório do usuário
 RUN pip install --no-cache-dir --user -r requirements.txt
 
+
+# =========================
 # Production stage
+# =========================
 FROM python:3.11-slim
 
-# Create non-root user
+# Criar usuário não-root
 RUN useradd -m -u 1000 appuser
 
-# Set working directory
 WORKDIR /app
 
-# Install runtime dependencies
+# Instalar dependências de runtime (ANTES de trocar usuário)
 RUN apt-get update && apt-get install -y \
     postgresql-client \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Python dependencies from builder
+# Copiar dependências Python do builder
 COPY --from=builder /root/.local /home/appuser/.local
 
-# Copy application code
+# Copiar código da aplicação
 COPY --chown=appuser:appuser . .
 
-# Set environment variables
+# Variáveis de ambiente
 ENV PATH=/home/appuser/.local/bin:$PATH \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
-# Switch to non-root user
+# Trocar para usuário seguro
 USER appuser
 
-# Expose port
+# Expor porta
 EXPOSE 8000
 
-# Health check
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Healthcheck simples
 HEALTHCHECK CMD curl --fail http://localhost:8000/health || exit 1
 
-
-# Run application
+# Rodar aplicação
 CMD ["gunicorn", "app.main:app", "--bind", "0.0.0.0:8000"]
