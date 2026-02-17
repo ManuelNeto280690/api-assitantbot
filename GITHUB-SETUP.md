@@ -6,10 +6,10 @@ Execute estes comandos no PowerShell (substitua com SEU email):
 
 ```powershell
 # Configurar nome de usuário (já feito)
-git config --global user.name "Fredmoney2015"
+git config --global user.name "ManuelNeto280690"
 
 # Configurar email (SUBSTITUA com seu email do GitHub)
-git config --global user.email "1440consultingllc@gmail.com"
+git config --global user.email "manuel.neto280690@gmail.com"
 
 # Verificar configuração
 git config --list
@@ -78,7 +78,7 @@ git push -u origin main
 
 ## Passo 5: Verificar
 
-1. Acesse: `https://github.com/Fredmoney2015/api-assitantbot`
+1. Acesse: `https://github.com/ManuelNeto280690/api-assitantbot`
 2. Você deve ver todo o código lá!
 
 ## 🔧 Troubleshooting
