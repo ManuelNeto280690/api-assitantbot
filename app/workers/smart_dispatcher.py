@@ -70,7 +70,7 @@ async def _dispatch_campaign_target_async(target_id: UUID):
             else:
                 logger.error(f"Unknown channel: {campaign.channel}")
                 target.status = "failed"
-                target.metadata["error"] = f"Unknown channel: {campaign.channel}"
+                target.extra_data["error"] = f"Unknown channel: {campaign.channel}"
                 await db.commit()
             
         except Exception as e:
@@ -168,8 +168,8 @@ async def _handle_dispatch_failure(target: CampaignTarget, campaign: Campaign, e
     if target.attempt_count >= max_attempts:
         # Max retries exceeded - send to dead letter queue
         target.status = "failed"
-        target.metadata["error"] = error
-        target.metadata["max_retries_exceeded"] = True
+        target.extra_data["error"] = error
+        target.extra_data["max_retries_exceeded"] = True
         
         logger.error(f"Target {target.id} failed after {max_attempts} attempts")
     else:
@@ -180,7 +180,7 @@ async def _handle_dispatch_failure(target: CampaignTarget, campaign: Campaign, e
         
         target.status = "retrying"
         target.next_attempt_at = datetime.utcnow() + timedelta(minutes=delay_minutes)
-        target.metadata["last_error"] = error
+        target.extra_data["last_error"] = error
         
         logger.info(f"Rescheduling target {target.id} in {delay_minutes} minutes")
     

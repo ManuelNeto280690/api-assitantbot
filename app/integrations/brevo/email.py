@@ -39,7 +39,7 @@ async def _send_email_async(target_id: Optional[UUID], to: str, subject: str, ht
                 target = await db.get(CampaignTarget, target_id)
                 if target:
                     target.status = "completed"
-                    target.metadata["message_id"] = response.get("messageId")
+                    target.extra_data["message_id"] = response.get("messageId")
                     await db.commit()
         
     except Exception as e:
@@ -50,7 +50,7 @@ async def _send_email_async(target_id: Optional[UUID], to: str, subject: str, ht
                 target = await db.get(CampaignTarget, target_id)
                 if target:
                     target.status = "failed"
-                    target.metadata["error"] = str(e)
+                    target.extra_data["error"] = str(e)
                     await db.commit()
         
         raise

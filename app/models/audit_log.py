@@ -34,7 +34,7 @@ class AuditLog(Base):
     request_id = Column(String(100), nullable=True, index=True)
     
     # Additional metadata
-    metadata = Column(JSONB, default={}, nullable=False)
+    extra_data = Column(JSONB, default={}, nullable=False)
     
     __table_args__ = (
         Index("ix_audit_logs_tenant_created", "tenant_id", "created_at"),

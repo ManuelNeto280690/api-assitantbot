@@ -52,8 +52,8 @@ async def _make_call_async(target_id: UUID, phone: str, assistant_id: str, scrip
         async with AsyncSessionLocal() as db:
             target = await db.get(CampaignTarget, target_id)
             if target:
-                target.metadata["call_id"] = response.get("id")
-                target.metadata["call_status"] = "initiated"
+                target.extra_data["call_id"] = response.get("id")
+                target.extra_data["call_status"] = "initiated"
                 await db.commit()
         
     except Exception as e:
@@ -63,7 +63,7 @@ async def _make_call_async(target_id: UUID, phone: str, assistant_id: str, scrip
             target = await db.get(CampaignTarget, target_id)
             if target:
                 target.status = "failed"
-                target.metadata["error"] = str(e)
+                target.extra_data["error"] = str(e)
                 await db.commit()
         
         raise
@@ -93,8 +93,8 @@ async def handle_voice_webhook(call_id: str, status: str, metadata: dict):
             campaign = await db.get(Campaign, target.campaign_id)
             
             # Update metadata
-            target.metadata["call_status"] = status
-            target.metadata["call_completed_at"] = datetime.utcnow().isoformat()
+            target.extra_data["call_status"] = status
+            target.extra_data["call_completed_at"] = datetime.utcnow().isoformat()
             
             # Apply smart retry logic
             retry_delay = VOICE_RETRY_STRATEGY.get(status)
@@ -103,7 +103,7 @@ async def handle_voice_webhook(call_id: str, status: str, metadata: dict):
                 # Schedule retry
                 target.status = "retrying"
                 target.next_attempt_at = datetime.utcnow() + timedelta(minutes=retry_delay)
-                target.metadata["retry_reason"] = status
+                target.extra_data["retry_reason"] = status
                 
                 logger.info(f"Rescheduling call for target {target_id} in {retry_delay} minutes due to {status}")
                 
@@ -122,7 +122,7 @@ async def handle_voice_webhook(call_id: str, status: str, metadata: dict):
             elif status == "voicemail":
                 # Mark as completed
                 target.status = "completed"
-                target.metadata["completed_reason"] = "voicemail"
+                target.extra_data["completed_reason"] = "voicemail"
                 
                 logger.info(f"Call to voicemail for target {target_id}, marking as completed")
                 
@@ -155,7 +155,7 @@ async def handle_voice_webhook(call_id: str, status: str, metadata: dict):
             else:
                 # Failed
                 target.status = "failed"
-                target.metadata["failure_reason"] = status
+                target.extra_data["failure_reason"] = status
                 
                 logger.error(f"Call failed for target {target_id}: {status}")
                 

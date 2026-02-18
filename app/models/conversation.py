@@ -30,7 +30,7 @@ class Conversation(Base):
     external_id = Column(String(255), nullable=True, index=True)
     
     # Metadata (JSONB)
-    metadata = Column(JSONB, default={}, nullable=False)
+    extra_data = Column(JSONB, default={}, nullable=False)
     
     # Relationships
     tenant = relationship("Tenant", back_populates="conversations")
@@ -76,7 +76,7 @@ class Message(Base):
     
     # Metadata (JSONB)
     # Stores attachments, delivery info, etc.
-    metadata = Column(JSONB, default={}, nullable=False)
+    extra_data = Column(JSONB, default={}, nullable=False)
     
     # Relationship
     conversation = relationship("Conversation", back_populates="messages")

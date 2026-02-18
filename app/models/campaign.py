@@ -116,7 +116,7 @@ class CampaignTarget(Base):
     
     # Result metadata (JSONB)
     # Stores channel-specific results: message_id, delivery_status, error_code, etc.
-    metadata = Column(JSONB, default={}, nullable=False)
+    extra_data = Column(JSONB, default={}, nullable=False)
     
     # Relationships
     campaign = relationship("Campaign", back_populates="targets")
