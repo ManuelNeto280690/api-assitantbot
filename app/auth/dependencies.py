@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.auth.jwt import jwt_validator
-from app.auth.rbac import Role, require_role as check_role
+from app.auth.rbac import Role, Permission, require_role as check_role, require_permission as check_permission
 from app.models.membership import Membership
 
 
@@ -123,3 +123,22 @@ def require_role(required_role: Role):
         return context
     
     return role_checker
+
+
+def require_permission(required_permission: Permission):
+    """
+    Dependency to require specific permission.
+    
+    Args:
+        required_permission: Required permission
+        
+    Returns:
+        Dependency function
+    """
+    async def permission_checker(
+        context: TenantContext = Depends(get_tenant_context)
+    ) -> TenantContext:
+        check_permission(context.role, required_permission)
+        return context
+    
+    return permission_checker
