@@ -11,13 +11,27 @@ from sqlalchemy.orm import DeclarativeBase, declared_attr
 from app.config import settings
 
 
+# Parse database URL to fix scheme and handle pooler specific assertions
+db_url = settings.database_url
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+elif db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+# Configure run-time connect args
+connect_args = {}
+if ":6543" in db_url:
+    # Supabase Transaction Pooler does not support prepared statements
+    connect_args["prepare_threshold"] = None
+
 # Create async engine
 engine = create_async_engine(
-    settings.database_url,
+    db_url,
     echo=settings.debug,
     pool_size=settings.db_pool_size,
     max_overflow=settings.db_max_overflow,
     pool_pre_ping=True,
+    connect_args=connect_args,
 )
 
 # Create async session factory
