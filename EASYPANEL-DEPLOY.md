@@ -81,7 +81,11 @@ SUPABASE_ANON_KEY=sua-chave-anon
 SUPABASE_SERVICE_ROLE_KEY=sua-chave-service-role
 SUPABASE_JWT_SECRET=seu-jwt-secret
 
-# Database (use Supabase PostgreSQL)
+# Database (Supabase com AsyncPG)
+# 1. Vá em Project Settings -> Database -> Connection Pooling
+# 2. Copie a string "URI" (Mode: Transaction, Port: 6543)
+# 3. Substitua 'postgres://' por 'postgresql+asyncpg://'
+# 4. Substitua '[YOUR-PASSWORD]' pela sua senha real
 DATABASE_URL=postgresql+asyncpg://postgres.[REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres
 DB_POOL_SIZE=20
 DB_MAX_OVERFLOW=10
